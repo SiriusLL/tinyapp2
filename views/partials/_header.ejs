@@ -15,12 +15,18 @@
 <input type="submit" value="Logout">
 </form>
 <% } else { %>
-  <form method="POST" action="/login" class="form-inline float:right">
+  <!-- <form method="POST" action="/login" class="form-inline float:right">
     <input class="form-control" type="text" placeholder="Enter Username" name="username">
     <input class="btn btn-primary" type="submit" value="Login">
-  </form>
+  </form> -->
 
-<% } %>
+  <ul class="nav">
+    <li><a href="/register">Register</a></li>
+    <li>&nbsp;</li>
+    <li><a href="/login">Login</a></li>
+  </ul>
+  <% } %>
+
 
         <!-- user login form with button -->
       </div>
