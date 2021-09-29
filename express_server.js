@@ -44,6 +44,28 @@ const addNewUser = (users, email, password) => {
   users[userId] = newUser;
   return userId;
 };
+
+//validate form inputs returns false of fields are not empty, otherwise returns an error message
+const validateInput = (email, password) => {
+  //create boolean
+  const emptyFields = !email || !password;
+
+  if (emptyFields) {
+    return "Please, fill-in both the email and password";
+  }
+
+  return false;
+};
+
+const findUserByEmail = (usersDb, email) => {
+  for (let userId in usersDb) {
+    if (usersDb[userId].email === email) {
+      return usersDb[userId];
+    }
+  }
+  return false;
+};
+
 // app.get("/", (req, res) => {
 //   res.send("hello");
 // });
@@ -138,16 +160,40 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  const id = generateRandomString();
-  console.log("reg", req.body);
+  // extract the email and password from the submitted form
   const email = req.body.email;
   const password = req.body.password;
 
+  // validate the email and password with a helper function
+  // return a string in errorMsg if there are no email and passwords
+  const errorMsg = validateInput(email, password);
+
+  // if we have an error message, send it and exit the function
+  if (errorMsg) {
+    res.status(400).send(errorMsg);
+    return;
+  }
+
+  // check that the user with that email is not already in the users db with the
+  // findUserByEmail helper function
+  const user = findUserByEmail(users, email);
+
+  // if the user exist send an error message
+  if (user) {
+    res
+      .status(400)
+      .send("A user with that email already exists, try to login instead");
+    return;
+  }
+
+  //Add the new user into the db using a helper function
+  // the function returns the new user id
   const userId = addNewUser(users, email, password);
 
+  // set the userId in the cookies to log the user in
   res.cookie("user_id", userId);
-  console.log("rr", users);
 
+  // redirect to /urls
   res.redirect("/urls");
 });
 
