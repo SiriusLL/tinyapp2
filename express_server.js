@@ -66,6 +66,17 @@ const findUserByEmail = (usersDb, email) => {
   return false;
 };
 
+const authenticateUser = (userDb, email, password) => {
+  // find the user with the email
+  const userFound = findUserByEmail(userDb, email);
+
+  // if user is retrieved and the password checks out return the user otherwise return false
+  if (userFound && userFound.password === password) {
+    return userFound;
+  }
+  return false;
+};
+
 // app.get("/", (req, res) => {
 //   res.send("hello");
 // });
@@ -114,7 +125,10 @@ app.get("/u/:shortURL", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  res.render("login");
+  const templateVars = {
+    user: null,
+  };
+  res.render("login", templateVars);
 });
 
 app.post("/urls", (req, res) => {
@@ -145,10 +159,26 @@ app.post("/urls/:shortURL/edit", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  console.log("login", req.body);
-  const username = req.body && req.body.username ? req.body.username : "";
-  res.cookie("username", username);
+  // console.log("login", req.body);
+  // const username = req.body && req.body.username ? req.body.username : "";
+
+  // extract email and password from the login form
+  const email = req.body.email;
+  const password = req.body.password;
+
+  const authenticatedUser = authenticateUser(users, email, password);
+
+  if (authenticatedUser) {
+    //if the user is authenticated, set the user id in the cookies
+    res.cookie("user_id", authenticatedUser.id);
+
+    res.redirect("/urls");
+  } else {
+    // the user is not authenticated
+    res.status(403).send("Wrong credentials");
+  }
   res.redirect("/urls");
+  // res.cookie("username", username);
 });
 
 app.post("/logout", (req, res) => {
@@ -160,7 +190,10 @@ app.post("/logout", (req, res) => {
 
 // Display the register page
 app.get("/register", (req, res) => {
-  res.render("register");
+  const templateVars = {
+    user: null,
+  };
+  res.render("register", templateVars);
 });
 
 app.post("/register", (req, res) => {
